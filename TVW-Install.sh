@@ -1,34 +1,34 @@
 #!/usr/bin/env bash
-# Install.sh – TrafkVerseScreensaver (NewestVersion, vorkompiliert) herunterladen und installieren
+# Install.sh – TrafkVerseWallpaper (NewestVersion, vorkompiliert) herunterladen und installieren
 set -euo pipefail
 
 # ---------------------------------------------------------------- Konfiguration
 # Welcher Stand wird geholt? "HEAD" = immer die neueste Version des Standard-Branches.
 # Zum Festpinnen auf einen Stand statt HEAD einen Commit-Hash eintragen
-# (oder beim Aufruf: SCREENSAVER_REF=<hash> ./Install.sh)
-# SCREENSAVER_REF steuert jetzt den Ref für die vorkompilierte Executable
+# (oder beim Aufruf: WALLPAPER_REF=<hash> ./Install.sh)
+# WALLPAPER_REF steuert jetzt den Ref für die vorkompilierte Executable
 # (nicht mehr für Quellcode+Makefile – das Bauen passiert nicht mehr hier).
-SCREENSAVER_REF="${SCREENSAVER_REF:-HEAD}"
+WALLPAPER_REF="${WALLPAPER_REF:-HEAD}"
 SF2_REF="${SF2_REF:-HEAD}"
 ICON_REF="${ICON_REF:-HEAD}"
 LICENSE_REF="${LICENSE_REF:-HEAD}"
 
-BASE_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/TrafkVerseScreensaver/${SCREENSAVER_REF}/NewestVersion"
-BINARY_URL="${BASE_URL}/TrafkVerseScreensaver"
+BASE_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/TrafkVerseWallpaper/${WALLPAPER_REF}/NewestVersion"
+BINARY_URL="${BASE_URL}/TrafkVerseWallpaper"
 SF2_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/SourceHop-Audios/${SF2_REF}/TrafkSF2.sf2"
 
-INSTALL_DIR="${HOME}/.local/share/TrafkHopEntertainment/TrafkVerseScreensaver"
-ICON_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/TrafkVerseScreensaver/${ICON_REF}/Icon.png"
-LICENSE_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/TrafkVerseScreensaver/${LICENSE_REF}/LICENSE"
+INSTALL_DIR="${HOME}/.local/share/TrafkHopEntertainment/TrafkVerseWallpaper"
+ICON_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/TrafkVerseWallpaper/${ICON_REF}/Icon.png"
+LICENSE_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/TrafkVerseWallpaper/${LICENSE_REF}/LICENSE"
 
 DESKTOP_DIR="${HOME}/.local/share/applications"
-DESKTOP_FILE="${DESKTOP_DIR}/TrafkVerseScreensaver.desktop"
+DESKTOP_FILE="${DESKTOP_DIR}/TrafkVerseWallpaper.desktop"
 
 # Theme icon name used in the .desktop file (and for icon-theme lookups by
 # docks/taskbars). Icon.png also gets installed under this name into the
 # user's hicolor icon theme — see the ".desktop-Datei"/"Icon-Theme" section
 # below for why an absolute path alone isn't enough for every consumer.
-ICON_NAME="TrafkVerseScreensaver"
+ICON_NAME="TrafkVerseWallpaper"
 ICON_THEME_DIR="${HOME}/.local/share/icons/hicolor/256x256/apps"
 
 # ---------------------------------------------------------------- Hilfsfunktionen
@@ -61,18 +61,18 @@ fi
 BUILD_DIR="$(mktemp -d)"
 trap 'rm -rf "$BUILD_DIR"' EXIT
 
-info "Lade TrafkVerseScreensaver (vorkompiliert) herunter ..."
-wget -q --show-progress -O "${BUILD_DIR}/TrafkVerseScreensaver" "$BINARY_URL"
+info "Lade TrafkVerseWallpaper (vorkompiliert) herunter ..."
+wget -q --show-progress -O "${BUILD_DIR}/TrafkVerseWallpaper" "$BINARY_URL"
 
 # Plausibilitätscheck: eine echte ELF-Executable beginnt mit dem Magic-Byte
 # 0x7F 'E' 'L' 'F' – fängt z. B. ab, dass statt der Datei aus Versehen eine
 # 404-HTML-Seite heruntergeladen wurde.
-if [ "$(head -c 4 "${BUILD_DIR}/TrafkVerseScreensaver" | tail -c 3)" != "ELF" ]; then
-    err "TrafkVerseScreensaver sieht nicht wie eine gültige ausführbare Datei aus (evtl. falsche URL oder Git-LFS-Platzhalter?)."
+if [ "$(head -c 4 "${BUILD_DIR}/TrafkVerseWallpaper" | tail -c 3)" != "ELF" ]; then
+    err "TrafkVerseWallpaper sieht nicht wie eine gültige ausführbare Datei aus (evtl. falsche URL oder Git-LFS-Platzhalter?)."
     err "Prüfe die URL: ${BINARY_URL}"
     exit 1
 fi
-chmod +x "${BUILD_DIR}/TrafkVerseScreensaver"
+chmod +x "${BUILD_DIR}/TrafkVerseWallpaper"
 ok "Download erfolgreich."
 
 # ---------------------------------------------------------------- Installation
@@ -107,7 +107,7 @@ wget -q --show-progress -O "${BUILD_DIR}/TrafkSF2.sf2" "$SF2_URL"
 # Plausibilitätscheck: eine echte SF2-Datei beginnt mit "RIFF"
 if [ "$(head -c 4 "${BUILD_DIR}/TrafkSF2.sf2")" != "RIFF" ]; then
     err "TrafkSF2.sf2 sieht nicht wie eine gültige SoundFont aus (evtl. Git-LFS-Platzhalter?)."
-    err "Der Screensaver läuft dann ohne Ton. Prüfe die URL: ${SF2_URL}"
+    err "TrafkVerseWallpaper läuft dann ohne Ton. Prüfe die URL: ${SF2_URL}"
 fi
 
 info "Lade Icon (Icon.png) herunter ..."
@@ -127,12 +127,12 @@ if [ ! -s "${BUILD_DIR}/LICENSE" ]; then
 fi
 
 # Läuft noch eine alte Instanz? (wird nicht beendet, nur gemeldet)
-if pgrep -x TrafkVerseScreensaver >/dev/null 2>&1; then
-    info "Hinweis: 'TrafkVerseScreensaver' läuft gerade. Die neue Version wird erst nach einem Neustart des Screensavers genutzt."
+if pgrep -x TrafkVerseWallpaper >/dev/null 2>&1; then
+    info "Hinweis: 'TrafkVerseWallpaper' läuft gerade. Die neue Version wird erst nach einem Neustart genutzt."
 fi
 
 # Dateien kopieren; bestehende werden überschrieben
-for f in TrafkVerseScreensaver TrafkSF2.sf2 Icon.png LICENSE; do
+for f in TrafkVerseWallpaper TrafkSF2.sf2 Icon.png LICENSE; do
     if [ -e "${INSTALL_DIR}/${f}" ] || [ -L "${INSTALL_DIR}/${f}" ]; then
         info "${f} existiert bereits, wird überschrieben."
     else
@@ -140,17 +140,17 @@ for f in TrafkVerseScreensaver TrafkSF2.sf2 Icon.png LICENSE; do
     fi
 done
 
-# TrafkVerseScreensaver: erst unter temporärem Namen im Zielordner ablegen, dann per mv ersetzen.
+# TrafkVerseWallpaper: erst unter temporärem Namen im Zielordner ablegen, dann per mv ersetzen.
 # mv ist atomar und klappt auch, wenn die alte Datei gerade läuft ("Text file busy").
-install -m 755 "${BUILD_DIR}/TrafkVerseScreensaver" "${INSTALL_DIR}/.TrafkVerseScreensaver.new"
-mv -f "${INSTALL_DIR}/.TrafkVerseScreensaver.new" "${INSTALL_DIR}/TrafkVerseScreensaver"
+install -m 755 "${BUILD_DIR}/TrafkVerseWallpaper" "${INSTALL_DIR}/.TrafkVerseWallpaper.new"
+mv -f "${INSTALL_DIR}/.TrafkVerseWallpaper.new" "${INSTALL_DIR}/TrafkVerseWallpaper"
 
 install -m 644 "${BUILD_DIR}/TrafkSF2.sf2" "${INSTALL_DIR}/TrafkSF2.sf2"
 install -m 644 "${BUILD_DIR}/Icon.png"     "${INSTALL_DIR}/Icon.png"
 install -m 644 "${BUILD_DIR}/LICENSE"      "${INSTALL_DIR}/LICENSE"
 
 # Kontrolle: stimmen die installierten Dateien mit den frisch geladenen überein?
-for f in TrafkVerseScreensaver TrafkSF2.sf2 Icon.png LICENSE; do
+for f in TrafkVerseWallpaper TrafkSF2.sf2 Icon.png LICENSE; do
     if ! cmp -s "${BUILD_DIR}/${f}" "${INSTALL_DIR}/${f}"; then
         err "${f} im Zielordner stimmt nicht mit der neuen Version überein!"
         exit 1
@@ -161,7 +161,7 @@ ok "Alle Dateien installiert und verifiziert."
 # ---------------------------------------------------------------- Icon-Theme
 # Programme, die Icons ueber ein Icon-Theme aufloesen (gtk_icon_theme_has_icon
 # & Co. - Taskbars, Docks, App-Grids), suchen nach einem NAMEN wie
-# "TrafkVerseScreensaver", nicht nach dem obigen absoluten Pfad in
+# "TrafkVerseWallpaper", nicht nach dem obigen absoluten Pfad in
 # INSTALL_DIR. "hicolor" ist das universelle Fallback-Theme, das jede
 # konforme Implementierung immer mitdurchsucht, egal welches Theme sonst
 # aktiv ist - daher landet die Datei dort, unter dem Namen, nicht der
@@ -173,10 +173,19 @@ command -v gtk-update-icon-cache >/dev/null 2>&1 && \
     gtk-update-icon-cache -q -t -f "${HOME}/.local/share/icons/hicolor" 2>/dev/null || true
 
 # ---------------------------------------------------------------- .desktop-Datei
+#
+# Hinweis Wallpaper-Modus: das Binary unterstützt einen --wallpaper-Flag
+# (siehe TrafkVerseWallpaper.c), der eine eigene WM_CLASS
+# ("TrafkVerseWallpaperWallpaper") setzt, damit z. B. ein WidgetsDaemon /
+# AppWallpaper-Setup sein Fenster gezielt greifen kann, ohne normal
+# gestartete Fenster zu erwischen. Dieser .desktop-Launcher startet
+# weiterhin die normale, interaktive Variante (ohne --wallpaper) – das
+# Einbinden über einen Wallpaper-Daemon ist Sache von dessen eigener
+# Konfiguration, nicht dieses Installers.
 DESKTOP_ENTRY_CONTENT="[Desktop Entry]
 Type=Application
-Name=TrafkVerseScreensaver
-Exec=${INSTALL_DIR}/TrafkVerseScreensaver
+Name=TrafkVerseWallpaper
+Exec=${INSTALL_DIR}/TrafkVerseWallpaper
 Path=${INSTALL_DIR}
 Icon=${ICON_NAME}
 StartupWMClass=${ICON_NAME}
@@ -202,7 +211,7 @@ else
 fi
 
 if [ -n "$USER_DESKTOP_DIR" ] && [ -d "$USER_DESKTOP_DIR" ]; then
-    DESKTOP_SHORTCUT="${USER_DESKTOP_DIR}/TrafkVerseScreensaver.desktop"
+    DESKTOP_SHORTCUT="${USER_DESKTOP_DIR}/TrafkVerseWallpaper.desktop"
     info "Erstelle Desktop-Verknüpfung (${DESKTOP_SHORTCUT}) ..."
     printf '%s\n' "$DESKTOP_ENTRY_CONTENT" > "$DESKTOP_SHORTCUT"
     # Ausfuehrbar machen: auf den meisten Desktops (inkl. Nautilus) sonst
@@ -221,7 +230,7 @@ fi
 
 # ---------------------------------------------------------------- Fertig
 ok "Installation abgeschlossen!"
-echo "    Programm : ${INSTALL_DIR}/TrafkVerseScreensaver"
+echo "    Programm : ${INSTALL_DIR}/TrafkVerseWallpaper"
 echo "    SoundFont: ${INSTALL_DIR}/TrafkSF2.sf2"
 echo "    Icon     : ${INSTALL_DIR}/Icon.png"
 echo "    LICENSE  : ${INSTALL_DIR}/LICENSE"
