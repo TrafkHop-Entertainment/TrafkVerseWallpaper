@@ -9,11 +9,12 @@
 ---
 ![IconLogo](Icon.png)
 *Only on Linux*
-A little C Program, that randomly generates forms that also make music. Not actually a screensaver, but sure does look like one!!
+
+A little C Program, that randomly generates forms that also make music. Great as a Wallpaper!
 
 ## How to use the program
 Download the Install.sh from latest Release of (even better) from the source code!
-Run the **Install.sh** file.
+Run the **TVW-Install.sh** file.
 Start the program from your Launcher or from the program filepath provided by the installer.
 **The Program runs on any linux system!**
 
