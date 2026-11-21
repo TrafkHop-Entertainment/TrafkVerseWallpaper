@@ -12,6 +12,7 @@ WALLPAPER_REF="${WALLPAPER_REF:-HEAD}"
 SF2_REF="${SF2_REF:-HEAD}"
 ICON_REF="${ICON_REF:-HEAD}"
 LICENSE_REF="${LICENSE_REF:-HEAD}"
+FONT_REF="${FONT_REF:-main}"
 
 BASE_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/TrafkVerseWallpaper/${WALLPAPER_REF}/NewestVersion"
 BINARY_URL="${BASE_URL}/TrafkVerseWallpaper"
@@ -20,6 +21,9 @@ SF2_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/SourceHop-Audi
 INSTALL_DIR="${HOME}/.local/share/TrafkHopEntertainment/TrafkVerseWallpaper"
 ICON_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/TrafkVerseWallpaper/${ICON_REF}/Icon.png"
 LICENSE_URL="https://raw.githubusercontent.com/TrafkHop-Entertainment/TrafkVerseWallpaper/${LICENSE_REF}/LICENSE"
+
+# Menue-Schrift: Noto Sans (SIL Open Font License), direkt vom offiziellen Noto-Repo
+FONT_URL="https://raw.githubusercontent.com/notofonts/notofonts.github.io/${FONT_REF}/fonts/NotoSans/full/ttf/NotoSans-Regular.ttf"
 
 DESKTOP_DIR="${HOME}/.local/share/applications"
 DESKTOP_FILE="${DESKTOP_DIR}/TrafkVerseWallpaper.desktop"
@@ -126,6 +130,18 @@ if [ ! -s "${BUILD_DIR}/LICENSE" ]; then
     exit 1
 fi
 
+# Menue-Schrift (Noto Sans). Nicht kritisch: fehlt sie, nutzt das Programm eine
+# Systemschrift (Noto Sans/DejaVu Sans), falls vorhanden.
+FONT_OK=0
+info "Lade Menü-Schrift (NotoSans-Regular.ttf) herunter ..."
+if wget -q --show-progress -O "${BUILD_DIR}/NotoSans-Regular.ttf" "$FONT_URL" 2>/dev/null \
+   && [ "$(stat -c%s "${BUILD_DIR}/NotoSans-Regular.ttf" 2>/dev/null || echo 0)" -gt 100000 ] \
+   && [ "$(head -c 4 "${BUILD_DIR}/NotoSans-Regular.ttf" | od -An -tx1 | tr -d ' \n')" = "00010000" ]; then
+    FONT_OK=1
+else
+    err "NotoSans-Regular.ttf konnte nicht geladen werden (${FONT_URL}). Das Menü nutzt dann eine Systemschrift, falls vorhanden."
+fi
+
 # Läuft noch eine alte Instanz? (wird nicht beendet, nur gemeldet)
 if pgrep -x TrafkVerseWallpaper >/dev/null 2>&1; then
     info "Hinweis: 'TrafkVerseWallpaper' läuft gerade. Die neue Version wird erst nach einem Neustart genutzt."
@@ -148,6 +164,9 @@ mv -f "${INSTALL_DIR}/.TrafkVerseWallpaper.new" "${INSTALL_DIR}/TrafkVerseWallpa
 install -m 644 "${BUILD_DIR}/TrafkSF2.sf2" "${INSTALL_DIR}/TrafkSF2.sf2"
 install -m 644 "${BUILD_DIR}/Icon.png"     "${INSTALL_DIR}/Icon.png"
 install -m 644 "${BUILD_DIR}/LICENSE"      "${INSTALL_DIR}/LICENSE"
+if [ "$FONT_OK" -eq 1 ]; then
+    install -m 644 "${BUILD_DIR}/NotoSans-Regular.ttf" "${INSTALL_DIR}/NotoSans-Regular.ttf"
+fi
 
 # Kontrolle: stimmen die installierten Dateien mit den frisch geladenen überein?
 for f in TrafkVerseWallpaper TrafkSF2.sf2 Icon.png LICENSE; do
@@ -156,6 +175,10 @@ for f in TrafkVerseWallpaper TrafkSF2.sf2 Icon.png LICENSE; do
         exit 1
     fi
 done
+if [ "$FONT_OK" -eq 1 ] && ! cmp -s "${BUILD_DIR}/NotoSans-Regular.ttf" "${INSTALL_DIR}/NotoSans-Regular.ttf"; then
+    err "NotoSans-Regular.ttf im Zielordner stimmt nicht mit der neuen Version überein!"
+    exit 1
+fi
 ok "Alle Dateien installiert und verifiziert."
 
 # ---------------------------------------------------------------- Icon-Theme
@@ -173,6 +196,9 @@ command -v gtk-update-icon-cache >/dev/null 2>&1 && \
     gtk-update-icon-cache -q -t -f "${HOME}/.local/share/icons/hicolor" 2>/dev/null || true
 
 # ---------------------------------------------------------------- .desktop-Datei
+#
+# Hinweis Menü: ohne Flag startet das Programm jetzt mit dem Menü (Start/Reroll/
+# Optionen/Exit). Mit --wallpaper bzw. -w startet es wie bisher ohne Menü.
 #
 # Hinweis Wallpaper-Modus: das Binary unterstützt einen --wallpaper-Flag
 # (siehe TrafkVerseWallpaper.c), der eine eigene WM_CLASS
@@ -234,6 +260,7 @@ echo "    Programm : ${INSTALL_DIR}/TrafkVerseWallpaper"
 echo "    SoundFont: ${INSTALL_DIR}/TrafkSF2.sf2"
 echo "    Icon     : ${INSTALL_DIR}/Icon.png"
 echo "    LICENSE  : ${INSTALL_DIR}/LICENSE"
+[ "$FONT_OK" -eq 1 ] && echo "    Schrift  : ${INSTALL_DIR}/NotoSans-Regular.ttf"
 echo "    Icon-Theme: ${ICON_THEME_DIR}/${ICON_NAME}.png"
 echo "    Starter  : ${DESKTOP_FILE}"
 [ -n "${DESKTOP_SHORTCUT:-}" ] && [ -e "${DESKTOP_SHORTCUT:-}" ] && echo "    Desktop  : ${DESKTOP_SHORTCUT}"
